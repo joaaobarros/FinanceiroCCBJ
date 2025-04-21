@@ -1,0 +1,29 @@
+services:
+  # Backend service
+  - type: web
+    name: ccbj-financeiro-backend
+    env: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn ccbj_financeiro.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+    autoDeploy: false
+    
+  # Frontend service
+  - type: static
+    name: ccbj-financeiro-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          name: ccbj-financeiro-backend
+          type: web
+          property: url
+    autoDeploy: false
