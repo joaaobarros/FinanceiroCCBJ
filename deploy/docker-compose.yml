@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=ccbj_financeiro
+      - POSTGRES_USER=ccbj_user
+      - POSTGRES_PASSWORD=ccbj_password
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: 
+      context: ../backend
+      dockerfile: Dockerfile
+    command: gunicorn ccbj_financeiro.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ../backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=postgres://ccbj_user:ccbj_password@db:5432/ccbj_financeiro
+      - SECRET_KEY=django-insecure-temporary-key-for-demo-purposes-only
+      - ALLOWED_HOSTS=*
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api/v1
+
+volumes:
+  postgres_data:

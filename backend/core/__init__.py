@@ -1,1 +1,0 @@
-# Arquivo __init__.py vazio para o pacote core
