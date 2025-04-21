@@ -1,1 +1,1 @@
-from .demo import *
+# Arquivo __init__.py vazio para o pacote settings
